@@ -8,9 +8,10 @@ const client = new kafka.KafkaClient("localhost:2181");
 
 //Handle push notifications
 
-const consumer = new Consumer(client, [ { topic: 'test', partition: 0 } ], { autoCommit: true });
+const consumer = new Consumer(client, [ { topic: 'employee', partition: 0 } ], { autoCommit: true });
 consumer.on('message', function (message) {
-    pushNotifications.handlePushTokens(message.value);
+    var data = JSON.parse(message.value);
+    pushNotifications.handlePushTokens(data);
 });
 
 const indexRouter = require('./src/routes/index');

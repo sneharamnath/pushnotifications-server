@@ -1,11 +1,24 @@
 var express = require('express');
 var router = express.Router();
+var pool = require('../../database');
 
 var savedPushTokens = [];
+let arr = [];
+
 const saveToken = (token) => {
-    if (savedPushTokens.indexOf(token) === -1) {
-      savedPushTokens.push(token);
+  pool.query('SELECT * FROM appTokens', function(err, response){
+    savedPushTokens = JSON.parse(JSON.stringify(response));
+    savedPushTokens.forEach(element => {
+      arr.push(element.token);
+    });
+    if(arr.indexOf(token) < 0){
+      let sql = `INSERT INTO appTokens (token) VALUES ('${token}')`;  
+      pool.query(sql, function (err, result) {  
+        if (err) throw err;  
+        console.log("1 record inserted");  
+      });  
     }
+  });
 }
 
 router.post('/', (req, res) => {
@@ -15,4 +28,4 @@ router.post('/', (req, res) => {
 });
 
 module.exports = router;
-module.exports.savedPushTokens = savedPushTokens;
+// module.exports.savedPushTokens = savedPushTokens;
