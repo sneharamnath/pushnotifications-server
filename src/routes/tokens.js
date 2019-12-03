@@ -1,31 +1,42 @@
 var express = require('express');
-var router = express.Router();
-var pool = require('../../database');
+let router = express.Router();
+let pool = require('../../database');
 
-var savedPushTokens = [];
-let arr = [];
+let savedPushTokens = [];
+const table = 'tokens';
 
-const saveToken = (token) => {
-  pool.query('SELECT * FROM appTokens', function(err, response){
+const saveToken = (req) => {
+  pool.query(`SELECT * FROM ${table}`,(err, response) => {
     savedPushTokens = JSON.parse(JSON.stringify(response));
     savedPushTokens.forEach(element => {
-      arr.push(element.token);
+      if((element.id === parseInt(req.params.id) && !element.token.length) || 
+          (element.id === parseInt(req.params.id) && element.token != req.body.token)){
+        pool.query(`UPDATE ${table} SET token = "${req.body.token}" WHERE ID = ${req.params.id}` , (err, res) => {
+          if (err) throw err;  
+          console.log("1 record updated");
+        });
+      }
     });
-    if(arr.indexOf(token) < 0){
-      let sql = `INSERT INTO appTokens (token) VALUES ('${token}')`;  
-      pool.query(sql, function (err, result) {  
-        if (err) throw err;  
-        console.log("1 record inserted");  
-      });  
-    }
   });
 }
 
-router.post('/', (req, res) => {
-    saveToken(req.body.token.value);
-    console.log(`Received push token, ${req.body.token.value}`);
-    res.send(`Received push token, ${req.body.token.value}`);
+const removeToken = (req) => {
+  pool.query(`UPDATE ${table} SET token = "" WHERE ID = ${req.params.id}` , (err, res) => {
+    if (err) throw err;  
+    console.log("1 record updated");
+  });
+}
+
+router.post('/register/:id', (req, res) => {
+    saveToken(req);
+    console.log(`Received push token, ${req.body.token}`);
+    res.send(`Received push token, ${req.body.token}`);
+});
+
+router.post('/deregister/:id', (req, res) => {
+  removeToken(req);
+  console.log(`Received employee to deregister , ${req.body.token}`);
+  res.send(`Received employee to deregister, ${req.body.token}`);
 });
 
 module.exports = router;
-// module.exports.savedPushTokens = savedPushTokens;

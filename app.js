@@ -1,8 +1,9 @@
-var express = require('express');
-var app = express();
+let express = require('express');
+let app = express();
+let pool = require('./database');
 
-var kafka = require('kafka-node');
-let pushNotifications = require('./src/handlers/pushnotifications');
+let kafka = require('kafka-node');
+let kafkaStreams = require('./src/handlers/kafkaEventStreamHandler');
 const Consumer = kafka.Consumer;
 const client = new kafka.KafkaClient("localhost:2181");
 
@@ -10,8 +11,7 @@ const client = new kafka.KafkaClient("localhost:2181");
 
 const consumer = new Consumer(client, [ { topic: 'employee', partition: 0 } ], { autoCommit: true });
 consumer.on('message', function (message) {
-    var data = JSON.parse(message.value);
-    pushNotifications.handlePushTokens(data);
+    kafkaStreams.handleKafkaEvents(message);
 });
 
 const indexRouter = require('./src/routes/index');
