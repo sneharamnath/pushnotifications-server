@@ -9,7 +9,7 @@ const expo = new Expo();
 let savedPushTokens = [];
 
 const handlePushTokens = (message) => {
-    pool.query('SELECT * FROM appTokens', function(err, response){
+    pool.query('SELECT * FROM tokens', function(err, response){
         savedPushTokens = JSON.parse(JSON.stringify(response));
         savedPushTokens = savedPushTokens.map(element => {
             return element.token;
