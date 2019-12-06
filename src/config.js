@@ -1,6 +1,6 @@
-module.exports = {
+export const db = {
     userName: 'sneharamnath',
     password: 'sneharamnath',
-    database: 'userTokens',
+    database: 'pushnotifications',
     table: 'tokens'
 }
